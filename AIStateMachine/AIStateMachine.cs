@@ -124,14 +124,94 @@ namespace AIStateMachineSpace
             return StateNames[index];
         }
 
+        /**
+         * Gets the currently active state of the machine.
+         **/
         public AIState GetCurrentState()
         {
             return currentState;
         }
 
+        /**
+         * Forces transition to the specified state.
+         **/
+        public void SetCurrentState(AIState state)
+        {
+            currentState = state;
+        }
+
+        /**
+         * Returns the list of state names this machine uses
+         **/
         public List<AIState> GetStateNames()
         {
             return StateNames;
+        }
+
+        /** 
+         * Adds a new state to the machine and updates the transition matrix.
+         * pVectorTo specifies the probability transitions from current
+         * existing states to new state.
+         * pVectorFrom specifies the probability transitions from new state
+         * to the currently existing states.
+         **/
+        public void AddState(AIState newState, Double[] pVectorTo, Double[] pVectorFrom)
+        {
+
+        }
+
+        /**
+         * Removes a state from the machine and updates transition matrix.
+         * TODO: Checks to make sure we're removing an existing state.
+         * TODO: If we are removing CURRENT state, then throw warning and transition.
+         **/
+        public void RemoveState(AIState state)
+        {
+            int removeIndex = StateNames.IndexOf(state);
+            int newVectorIndex = 0;
+            int newProbIndex = 0;
+
+            double[][] newTransitionMatrix = new double[NumStates - 1][];
+
+            /**
+             * For every row vector in the transitional matrix:
+             **/
+            for (int vectorIndex = 0; vectorIndex < NumStates; vectorIndex++)
+            {
+                // If it doesn't correspond to the state we are removing:
+                if (vectorIndex != removeIndex)
+                {
+                    newProbIndex = 0;
+                    newTransitionMatrix[newVectorIndex] = new Double[NumStates - 1];
+                    
+                    /**
+                     * Then for every probability in this vector:
+                     **/
+                    for (int probIndex = 0; probIndex < NumStates; probIndex++)
+                    {
+                        
+                        // If it doesn't correspond to the state we are removing:
+                        if (probIndex != removeIndex)
+                        {
+                            /**
+                             * Then copy it into the new Transitional Matrix
+                             **/
+                            newTransitionMatrix[newVectorIndex][newProbIndex] = TransitionMatrix[vectorIndex][probIndex];
+                            
+
+                        }
+                        newProbIndex++;
+                    }
+                }
+
+                newVectorIndex++;
+            }
+
+            TransitionMatrix = newTransitionMatrix;
+            NumStates -= 1;
+            StateNames.Remove(state);
+
+
         }
 
 

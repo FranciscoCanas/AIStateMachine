@@ -69,6 +69,9 @@ namespace Tests
             Console.WriteLine(TestGetNextState(m2, 4));
             Console.WriteLine(TestGetNextState(m3, 16));
 
+            Console.WriteLine(TestRemoveState(m2,AIState.Chase));
+            Console.WriteLine(TestMembers(m2));
+
 
 
         }
@@ -147,6 +150,26 @@ namespace Tests
 
            
             return result;
+        }
+
+        public String TestRemoveState(AIStateMachine current, AIState state) {
+            String result = PASS;
+
+            Console.WriteLine(SEP);
+            Console.WriteLine("Testing RemoveState:");
+
+            try
+            {
+                current.RemoveState(state);
+            }
+            catch (SystemException)
+            {
+                Console.WriteLine("Machine Remove State Test ");
+            }
+
+
+            return result;
+
         }
        
     }
