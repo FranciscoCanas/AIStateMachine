@@ -19,6 +19,11 @@ namespace AIStateMachineSpace
          **/
 
         /**
+         * Name of the machine.
+         **/
+        private String machineName;
+
+        /**
          * Name of the currently selected state.
          **/
         private AIState currentState;
@@ -48,7 +53,7 @@ namespace AIStateMachineSpace
         /**
          * Constructor for txt-initialized AISMs
          **/
-        public AIStateMachine(String aifile)
+        public AIStateMachine(String aifile, String aiName)
         {
             /** Read state names and vectors **/
             //Initialize(numStates, stateNames, tmatrix)
@@ -57,8 +62,9 @@ namespace AIStateMachineSpace
         /**
          * Constructor for manually-initialized AISMs
          **/
-        public AIStateMachine(int numStates, AIState[] stateNames, double[][] tmatrix)
+        public AIStateMachine(String aiName, int numStates, AIState[] stateNames, double[][] tmatrix)
         {
+            machineName = aiName;
             rtransition = new Random();
             StateNames = new List<AIState>(numStates);
             TransitionMatrix = new Double[numStates][];
@@ -84,10 +90,44 @@ namespace AIStateMachineSpace
 
         }
 
+        /**
+         * Returns name of machine.
+         **/
+        public String GetName()
+        {
+            return machineName;
+        }
 
+        /**
+         * Returns the number of states in this machine.
+         **/
+        public int GetNumStates()
+        {
+            return NumStates;
+        }
+
+        /**
+         * Returns the probability vector for the specified state.
+         **/
         public double[] GetPVector(AIState state)
         {
             return TransitionMatrix[StateNames.IndexOf(state)];
+        }
+
+        /**
+         * True if the probabilities in pVector add
+         * up to exactly 1.0. False otherwise.
+         **/
+        static public bool ValidVector(double[] pVector)
+        {
+            double total = 0.0;
+
+            foreach (Double prob in pVector)
+            {
+                total += prob;
+            }
+
+            return (total == 1.0);
         }
 
 
@@ -164,6 +204,9 @@ namespace AIStateMachineSpace
          * Removes a state from the machine and updates transition matrix.
          * TODO: Checks to make sure we're removing an existing state.
          * TODO: If we are removing CURRENT state, then throw warning and transition.
+         * TODO: RemoveState and AddState need to take new matrices as input, 
+         * to uphold 1.0 property below:
+         * TODO: All new pvectors must be validated (ie. add up to 1.0). Write validation helper.
          **/
         public void RemoveState(AIState state)
         {
@@ -172,6 +215,14 @@ namespace AIStateMachineSpace
             int newProbIndex = 0;
 
             double[][] newTransitionMatrix = new double[NumStates - 1][];
+
+            /** 
+             * If removing currentState, or only one state left.
+             **/
+            if (state.Equals(currentState) || (NumStates == 1) || !(StateNames.Contains(state)))
+            {
+                return;
+            }
 
             /**
              * For every row vector in the transitional matrix:
@@ -195,16 +246,22 @@ namespace AIStateMachineSpace
                         {
                             /**
                              * Then copy it into the new Transitional Matrix
+                             * adjusting value for the removed state so as to
+                             * still uphold the transition matrix property of
+                             * every vector adding up to 1.0
                              **/
-                            newTransitionMatrix[newVectorIndex][newProbIndex] = TransitionMatrix[vectorIndex][probIndex];
-                            
+                            newTransitionMatrix[newVectorIndex][newProbIndex] = 
+                                TransitionMatrix[vectorIndex][probIndex] +
+                                TransitionMatrix[vectorIndex][removeIndex] / (NumStates - 1);
 
+                            newProbIndex++;
                         }
-                        newProbIndex++;
+                        
                     }
+                    newVectorIndex++;
                 }
 
-                newVectorIndex++;
+                
             }
 
             TransitionMatrix = newTransitionMatrix;

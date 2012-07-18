@@ -48,18 +48,20 @@ namespace Tests
              * Instantiate test machines
              **/
             Console.WriteLine("Initializing Machine 1...");
-            m1 = new AIStateMachine(2, m1Names, m1TMatrix);
+            m1 = new AIStateMachine("m1", 2, m1Names, m1TMatrix);
             Console.WriteLine("Success.");
             Console.WriteLine("Initializing Machine 2...");
-            m2 = new AIStateMachine(3, m2Names, m2TMatrix);
+            m2 = new AIStateMachine("m2", 3, m2Names, m2TMatrix);
             Console.WriteLine("Success.");
             Console.WriteLine("Initializing Machine 3...");
-            m3 = new AIStateMachine(4, m3Names, m3TMatrix);
+            m3 = new AIStateMachine("m3", 4, m3Names, m3TMatrix);
             Console.WriteLine("Success.");
 
             /**
              * Run Tests
              **/
+
+            Console.WriteLine(TestValidVector());
             
             Console.WriteLine(TestMembers(m1));
             Console.WriteLine(TestMembers(m2));
@@ -69,10 +71,50 @@ namespace Tests
             Console.WriteLine(TestGetNextState(m2, 4));
             Console.WriteLine(TestGetNextState(m3, 16));
 
-            Console.WriteLine(TestRemoveState(m2,AIState.Chase));
+            Console.WriteLine(TestRemoveState(m1, AIState.Chase));
+            Console.WriteLine(TestMembers(m1));
+
+            Console.WriteLine(TestRemoveState(m2,AIState.Hide));
             Console.WriteLine(TestMembers(m2));
 
+            Console.WriteLine(TestRemoveState(m3, AIState.Hide));
+            Console.WriteLine(TestMembers(m3));
+            Console.WriteLine(TestGetNextState(m3, 16));
 
+
+
+        }
+
+        public String TestValidVector()
+        {
+            String result = FAIL;
+            Console.WriteLine("Testing ValidVector:");
+
+            if (!AIStateMachine.ValidVector(new double[] { 1.0 }))
+            {
+                Console.WriteLine("{1.0}");
+                return FAIL;
+            }
+
+            if (!AIStateMachine.ValidVector(new double[] {0.5, 0.5}))
+            {
+                Console.WriteLine("{0.5, 0.5}");
+                return FAIL;
+            }
+
+            if (AIStateMachine.ValidVector(new double[] { 0.5, 0.5, 0.75 }))
+            {
+                Console.WriteLine("{0.5, 0.5, 0.75}");
+                return FAIL;
+            }
+
+            if (!AIStateMachine.ValidVector(new double[] { 0.5, 0.5, 0.0 }))
+            {
+                Console.WriteLine("{0.5, 0.5, 0.0}");
+                return FAIL;
+            }
+
+            return PASS;
 
         }
 
@@ -80,7 +122,8 @@ namespace Tests
 
             String result = FAIL;
             Console.WriteLine(SEP);
-            Console.WriteLine("Testing Machine Members:");
+            Console.Write("Testing Machine Members for ");
+            Console.WriteLine(current.GetName());
 
             Console.WriteLine("1) Machine State Names:");
             try
@@ -90,8 +133,9 @@ namespace Tests
                     Console.WriteLine(state.ToString());
                 }
             }
-            catch (SystemException)
+            catch (SystemException exc)
             {
+                Console.WriteLine(exc.ToString());
                 Console.Write("Machine State Names Test ");
                 return FAIL;
             }
@@ -118,8 +162,9 @@ namespace Tests
                     Console.WriteLine("]");
                 }
             }
-            catch (SystemException)
+            catch (SystemException exc)
             {
+                Console.WriteLine(exc.ToString());
                 Console.Write("Machine PVector Test ");
                 return FAIL;
             }
@@ -134,7 +179,8 @@ namespace Tests
         {
             String result = PASS;
             Console.WriteLine(SEP);
-            Console.WriteLine("Testing Get Next State:");
+            Console.Write("Testing Get Next State ");
+            Console.WriteLine(current.GetName());
             try
             {
                 for (int transition = 0; transition < limit; transition++)
@@ -142,8 +188,9 @@ namespace Tests
                     Console.WriteLine(current.GetNextState().ToString());
                 }
             }
-            catch (SystemException)
+            catch (SystemException exc)
             {
+                Console.WriteLine(exc.ToString());
                 Console.Write("Machine GetNextState Test ");
                 return FAIL;
             }
@@ -154,17 +201,32 @@ namespace Tests
 
         public String TestRemoveState(AIStateMachine current, AIState state) {
             String result = PASS;
+            int oldNum;
 
             Console.WriteLine(SEP);
-            Console.WriteLine("Testing RemoveState:");
+            Console.WriteLine("Testing RemoveState " + current.GetName() + " " + state.ToString());
+            
 
             try
             {
+                oldNum = current.GetNumStates();
                 current.RemoveState(state);
+                if (current.GetNumStates() != (oldNum - 1))
+                {
+                    result = FAIL;
+                }
             }
-            catch (SystemException)
+            catch (SystemException exc)
             {
+                Console.WriteLine(exc.ToString());
                 Console.WriteLine("Machine Remove State Test ");
+                return FAIL;
+            }
+
+            foreach (AIState newState in current.GetStateNames())
+            {
+                Console.WriteLine(newState.ToString() + "P Vector Test: " 
+                    + AIStateMachine.ValidVector(current.GetPVector(newState)));
             }
 
 
