@@ -188,6 +188,47 @@ namespace AIStateMachineSpace
             return StateNames;
         }
 
+        /**
+         * Takes an invalidated pVector (sum of elements !- 1.0)
+         * and returns a validated pVector with same proportions.
+         **/
+        static public double[] FixPVector(double[] pVector)
+        {
+            double[] newPVector = new double[pVector.Length];
+            double total = 0.0;
+
+            foreach (double prob in pVector)
+            {
+                total += prob;
+            }
+
+            for (int index = 0; index < pVector.Length; index++)
+            {
+                newPVector[index] = pVector[index] / total;
+            }
+
+
+            return newPVector;
+        }
+
+        /** 
+         * Adds a new probability to an existing PVector and
+         * maintains the transition matrix property (sum of vector = 1.0)
+         **/
+        public double[] AddToPVector(double prob, double[] pVector)
+        {
+            double[] newPVector = new double[NumStates + 1];
+            double total = 0.0;
+
+            for (int index = 0; index < NumStates; index++)
+            {
+                newPVector[index] = pVector[index] * (1.0 - prob);
+            }
+            newPVector[NumStates] = prob;
+
+            return newPVector;
+        }
+
         /** 
          * Adds a new state to the machine and updates the transition matrix.
          * pVectorTo specifies the probability transitions from current
@@ -197,16 +238,23 @@ namespace AIStateMachineSpace
          **/
         public void AddState(AIState newState, Double[] pVectorTo, Double[] pVectorFrom)
         {
+            // TODO: Implement AddState
+            double[][] newTransitionMatrix = new double[NumStates + 1][];
+            StateNames.Add(newState);
 
+            for (int index = 0; index < NumStates; index++)
+            {
+                newTransitionMatrix[index] = AddToPVector(pVectorTo[index], TransitionMatrix[index]);
+            }
+            newTransitionMatrix[NumStates] = pVectorFrom;
+
+            TransitionMatrix = newTransitionMatrix;
         }
 
         /**
          * Removes a state from the machine and updates transition matrix.
          * TODO: Checks to make sure we're removing an existing state.
          * TODO: If we are removing CURRENT state, then throw warning and transition.
-         * TODO: RemoveState and AddState need to take new matrices as input, 
-         * to uphold 1.0 property below:
-         * TODO: All new pvectors must be validated (ie. add up to 1.0). Write validation helper.
          **/
         public void RemoveState(AIState state)
         {
@@ -219,7 +267,7 @@ namespace AIStateMachineSpace
             /** 
              * If removing currentState, or only one state left.
              **/
-            if (state.Equals(currentState) || (NumStates == 1) || !(StateNames.Contains(state)))
+            if ((NumStates == 1) || !(StateNames.Contains(state)))
             {
                 return;
             }
@@ -261,16 +309,18 @@ namespace AIStateMachineSpace
                     newVectorIndex++;
                 }
 
-                
             }
 
             TransitionMatrix = newTransitionMatrix;
             NumStates -= 1;
             StateNames.Remove(state);
-
+            // If we just removed the current state:
+            if (state.Equals(currentState))
+            {
+                // Force transition to first available state:
+                SetCurrentState(StateNames[0]);
+            }
 
         }
-
-
     }
 }

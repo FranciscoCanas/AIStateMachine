@@ -79,7 +79,9 @@ namespace Tests
 
             Console.WriteLine(TestRemoveState(m3, AIState.Hide));
             Console.WriteLine(TestMembers(m3));
-            Console.WriteLine(TestGetNextState(m3, 16));
+            Console.WriteLine(TestGetNextState(m3, 32));
+
+            Console.WriteLine(TestFixPVector());
 
 
 
@@ -87,7 +89,7 @@ namespace Tests
 
         public String TestValidVector()
         {
-            String result = FAIL;
+            String result = PASS;
             Console.WriteLine("Testing ValidVector:");
 
             if (!AIStateMachine.ValidVector(new double[] { 1.0 }))
@@ -114,8 +116,50 @@ namespace Tests
                 return FAIL;
             }
 
-            return PASS;
+            return result;
 
+        }
+
+        public String TestFixPVector()
+        {
+            double[] pv1;
+            double[] pv2;
+            double[] pv3;
+
+            String result = PASS;
+            Console.WriteLine(SEP);
+            Console.WriteLine("Testing FixPVector:");
+            
+            try
+            {
+                pv1 = AIStateMachine.FixPVector(new double[] { 0.3, 0.3 });
+                pv2 = AIStateMachine.FixPVector(new double[] { 0.6, 0.6 });
+                pv3 = AIStateMachine.FixPVector(new double[] { 0.1, 0.2, 0.1 });
+
+                
+            }
+            catch (SystemException exc)
+            {
+                Console.WriteLine(exc.ToString());
+                Console.Write("FixPVector tests ");
+                return FAIL;
+            }
+
+            PrintProbVector(pv1);
+            PrintProbVector(pv2);
+            PrintProbVector(pv3);
+
+            return result;
+        }
+
+        public void PrintProbVector(double[] vector)
+        {
+            Console.Write("[ ");
+            foreach (double prob in vector)
+            {
+                Console.Write(prob + " ");
+            }
+            Console.WriteLine("]");
         }
 
         public String TestMembers(AIStateMachine current) {
@@ -152,14 +196,9 @@ namespace Tests
                 {
                     Double[] pvector = new Double[current.GetStateNames().Count()];
                     pvector = current.GetPVector(state);
-                    Console.Write(state.ToString());
-                    Console.Write(": [");
-                    for (int pIndex = 0; pIndex < current.GetStateNames().Count(); pIndex++)
-                    {
-                        Console.Write(pvector[pIndex]);
-                        Console.Write(" ");
-                    }
-                    Console.WriteLine("]");
+                    Console.Write(state.ToString() + ": ");
+                    PrintProbVector(pvector);
+                  
                 }
             }
             catch (SystemException exc)
