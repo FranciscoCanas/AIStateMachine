@@ -1,13 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
+using System.Xml;
 
 
 namespace AIStateMachineSpace
@@ -51,12 +45,16 @@ namespace AIStateMachineSpace
         private Random rtransition;
 
         /**
-         * Constructor for txt-initialized AISMs
+         * Constructor for xml-initialized AISMs
          **/
         public AIStateMachine(String aifile, String aiName)
         {
             /** Read state names and vectors **/
-            //Initialize(numStates, stateNames, tmatrix)
+            XmlDocument machineDoc = new XmlDocument();
+            rtransition = new Random();
+            machineDoc.Load(aifile);
+            machineName = aiName;
+            LoadFromXML(machineDoc.SelectSingleNode("/MachineSpecifications/AIStateMachine[@name='" + aiName + "']"));
         }
 
         /**
@@ -321,6 +319,67 @@ namespace AIStateMachineSpace
                 SetCurrentState(StateNames[0]);
             }
 
+        }
+
+        /// <summary>
+        /// Initializes the AIStateMachine using a transition matrix
+        /// found in the XmlNode MachineNode.
+        /// </summary>
+        /// <param name="MachineNode">An XMLNode containing the number of states,
+        /// the names of each state, and the transition matrix.</param>
+        public void LoadFromXML(XmlNode MachineNode)
+        {
+            int index = 0;
+            AIState[] states;
+            Double[][] matrix;
+
+            int numstates = Convert.ToInt32(MachineNode.Attributes.GetNamedItem("size").Value);
+            String name = MachineNode.Attributes.GetNamedItem("name").Value;
+            states = new AIState[numstates];
+            matrix = new Double[numstates][];
+
+            String[] stateNames = 
+                MachineNode.SelectSingleNode("States").InnerText.Split(new Char[] { ' ' });
+
+            /**
+             * Parse the State names from file into an array
+             * of AIState.
+             **/
+            foreach (String state in stateNames)
+            {
+                if (state.Trim() != "")
+                {
+                    states[index] = (AIState)Enum.Parse(typeof(AIState),state);
+                    index++;
+                }
+            }
+
+            /**
+             * Parse the probability vectors from file into our
+             * matrix of doubles.
+             **/
+            index = 0;
+            foreach (XmlNode vector in MachineNode.SelectSingleNode("Vectors"))
+            {
+                matrix[index] = new Double[numstates];
+                String[] probs = vector.InnerText.Split(new Char[] { ' ' });
+                for(int pIndex = 0; pIndex < numstates; pIndex++)
+                {
+                    matrix[index][pIndex] = Convert.ToDouble(probs[pIndex]);
+                }
+                index++;
+
+            }
+
+            
+            /**
+             * Initialize the AIState with the info from
+             * the xml file.
+             **/
+            StateNames = new List<AIState>(numstates);
+            TransitionMatrix = new Double[numstates][];
+            Initialize(numstates, states, matrix);
+            
         }
     }
 }

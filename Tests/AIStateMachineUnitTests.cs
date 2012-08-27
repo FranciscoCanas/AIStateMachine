@@ -15,6 +15,9 @@ namespace Tests
         AIStateMachine m1;
         AIStateMachine m2;
         AIStateMachine m3;
+        AIStateMachine x1;
+        AIStateMachine x2;
+        AIStateMachine x3;
 
         public AIStateMachineUnitTests() {
 
@@ -41,7 +44,8 @@ namespace Tests
                                    };
 
 
-    
+           
+            
 
 
             /**
@@ -56,6 +60,17 @@ namespace Tests
             Console.WriteLine("Initializing Machine 3...");
             m3 = new AIStateMachine("m3", 4, m3Names, m3TMatrix);
             Console.WriteLine("Success.");
+            Console.WriteLine("Initializing XML Machine 1...");
+            x1 = new AIStateMachine("Machines.xml", "xmachine1");
+            Console.WriteLine("Success.");
+            Console.WriteLine("Initializing XML Machine 2...");
+            x2 = new AIStateMachine("Machines.xml", "xmachine2");
+            Console.WriteLine("Success.");
+            Console.WriteLine("Initializing XML Machine 2...");
+            x3 = new AIStateMachine("Machines.xml", "xmachine3");
+            Console.WriteLine("Success.");
+
+            
 
             /**
              * Run Tests
@@ -66,6 +81,9 @@ namespace Tests
             Console.WriteLine(TestMembers(m1));
             Console.WriteLine(TestMembers(m2));
             Console.WriteLine(TestMembers(m3));
+            Console.WriteLine(TestMembers(x1));
+            Console.WriteLine(TestMembers(x2));
+            Console.WriteLine(TestMembers(x3));
 
             Console.WriteLine(TestGetNextState(m1, 4));
             Console.WriteLine(TestGetNextState(m2, 4));

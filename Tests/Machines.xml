@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MachineSpecifications>
+  <AIStateMachine name="xmachine1" size="2">
+    <States>Chase Avoid</States>
+    <Vectors>
+      <v1>0.5 0.5</v1>
+      <v2>0.75 0.25</v2>
+    </Vectors>
+  </AIStateMachine>
+  <AIStateMachine name="xmachine2" size="3">
+    <States>Chase Avoid Circle</States>
+    <Vectors>
+      <v1>0.5 0.25 0.25</v1>
+      <v2>0.5 0.25 0.25</v2>
+      <v3>0.1 0.2 0.7</v3>
+    </Vectors>
+  </AIStateMachine>
+  <AIStateMachine name="xmachine3" size="6">
+    <States>Hide Chase Avoid Circle Shoot None</States>
+    <Vectors>
+      <v1>0.1 0.2 0.2 0.1 0.1 0.3</v1>
+      <v2>0.1 0.25 0.25 0.1 0.1 0.2</v2>
+      <v3>0.1 0.2 0.1 0.1 0.3 0.2</v3>
+      <v4>0.05 0.2 0.2 0.1 0.1 0.35</v4>
+      <v5>0.1 0.25 0.25 0.2 0.1 0.1</v5>
+      <v6>0.1 0.1 0.0 0.1 0.1 0.6</v6>
+    </Vectors>
+  </AIStateMachine>
+</MachineSpecifications> 
